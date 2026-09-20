@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Classic Tilt Maze - 木製ボール転がし迷路</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div id="game-wrapper">
+    <a href="../../index.html" class="back-link">&larr; Portal</a>
+
+    <!-- Top UI Bar -->
+    <div id="ui-header">
+      <div class="stat-item">Stage: <span id="stage-display" class="stat-val">1/3</span></div>
+      <div class="stat-item">Time: <span id="time-display" class="stat-val">00:00</span></div>
+      <div class="stat-item">Falls: <span id="falls-display" class="stat-val">0</span></div>
+    </div>
+
+    <!-- Tilt Indicator (Bottom-Right) -->
+    <div id="tilt-indicator" title="Current Tilt Vector">
+      <div id="tilt-dot"></div>
+    </div>
+
+    <!-- Start Overlay (iOS Permission & Game Start) -->
+    <div id="start-overlay" class="overlay">
+      <div class="dialog-box">
+        <h2>Classic Tilt Maze</h2>
+        <p class="dialog-desc">
+          スマホを傾けて、鉄球を転がしてゴールを目指しましょう！<br>
+          黒い落とし穴に落ちないよう慎重にバランスを取ってください。<br>
+          <small style="display:block; margin-top:10px; color:#c7b198;">
+            ※ PCの場合は <strong>矢印キー / WASD</strong> または <strong>画面ドラッグ</strong> で操作できます。
+          </small>
+        </p>
+        <button id="start-btn" class="btn">ゲーム開始</button>
+      </div>
+    </div>
+
+    <!-- Clear Overlay -->
+    <div id="clear-overlay" class="overlay" style="display: none;">
+      <div class="dialog-box">
+        <h2 id="clear-title">Stage Cleared!</h2>
+        <p class="dialog-desc" id="clear-stats">クリアタイム: 00:00<br>落下回数: 0回</p>
+        <button id="next-btn" class="btn">次のステージへ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LittleJS Engine -->
+  <script src="littlejs.min.js"></script>
+  <!-- Game Implementation -->
+  <script src="game.js"></script>
+
+</body>
+</html>
