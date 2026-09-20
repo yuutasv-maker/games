@@ -14,6 +14,7 @@ const BOARD_SIZE = MAZE_GRID_SIZE * CELL_SIZE;
 
 let currentStage = 0;
 let totalFalls = 0;
+let gameStartTime = 0; // 全ステージ通算の開始時刻
 let stageStartTime = 0;
 let isPlaying = false;
 let isStageClearing = false;
@@ -150,7 +151,8 @@ class Ball extends EngineObject {
   }
 
   update() {
-    if (!isPlaying) return;
+    // クリア演出中またはプレイ中以外はボール更新を停止（演出中の穴落下暴走防止: C-3）
+    if (!isPlaying || isStageClearing) return;
 
     if (this.falling) {
       // 穴に落ちるアニメーション (縮小しながら中心へ)
@@ -166,28 +168,24 @@ class Ball extends EngineObject {
     const accel = tiltVector.scale(0.045);
     this.velocity = this.velocity.add(accel);
 
+    // 転がり摩擦 (damping) の適用（チルト静止時の自然な減速・停止: C-2）
+    this.velocity = this.velocity.scale(this.damping);
+
     // 最大速度リミット (壁抜け防止)
     const maxSpeed = 0.35;
     if (this.velocity.length() > maxSpeed) {
       this.velocity = this.velocity.normalize().scale(maxSpeed);
     }
 
-    // 落とし穴との距離判定 (吸い込み判定)
+    // 落とし穴との距離判定 (physics.js の checkHolePull を使用して共通化: I-5)
     for (const hole of activeHoles) {
-      const dist = this.pos.distance(hole.pos);
-      if (dist < 0.65) {
-        // 穴の中心への引力
-        const pull = hole.pos.subtract(this.pos).scale(0.03);
-        this.velocity = this.velocity.add(pull);
-
-        if (dist < 0.32) {
-          // 完全に穴へ落ちた
-          this.falling = true;
-          playSoundFall();
-          totalFalls++;
-          updateHeaderUI();
-          break;
-        }
+      const res = checkHolePull(this, hole.pos, 0.65, 0.32);
+      if (res.falling) {
+        this.falling = true;
+        playSoundFall();
+        totalFalls++;
+        updateHeaderUI();
+        break;
       }
     }
 
@@ -201,14 +199,9 @@ class Ball extends EngineObject {
   }
 
   collideWithObject(other) {
-    // 壁との衝突音
-    if (other instanceof Wall) {
-      const hitSpeed = this.velocity.length();
-      if (hitSpeed > 0.03) {
-        playSoundWoodHit(hitSpeed * 4);
-      }
-    }
-    return true; // LittleJS 標準の物理反発に任せる
+    // LittleJS 組み込みの AABB 衝突解決をバイパス（return false）
+    // 物理衝突解決および衝突効果音の再生は gameUpdatePost 内の resolveWallCollisions に一本化（C-1, C-4）
+    return false;
   }
 
   render() {
@@ -291,9 +284,9 @@ function triggerStageClear() {
   isStageClearing = true;
   playSoundClear();
 
-  // 祝福のゴールドパーティクル発生
+  // 祝福のゴールドパーティクル発生 (emitTime = 0.8秒で自然停止させメモリリークを防止: I-1)
   new ParticleEmitter(
-    activeGoal.pos, 0, 0, 0, 80, PI, // pos, angle, emitSize, emitTime, emitRate, emitCone
+    activeGoal.pos, 0, 0, 0.8, 80, PI, // pos, angle, emitSize, emitTime, emitRate, emitCone
     tile(0), new Color(1, 0.8, 0.2), new Color(1, 0.5, 0.1), // tile, startColor, endColor
     new Color(0, 0, 0, 0), new Color(0, 0, 0, 0), // pad
     1.2, 0.1, 0.2, 0.05, 0.01 // particleTime, sizeStart, sizeEnd, particleSpeed, particleAngleSpeed
@@ -310,11 +303,10 @@ function showClearDialog() {
   const stats = document.getElementById('clear-stats');
   const nextBtn = document.getElementById('next-btn');
 
-  const elapsed = Math.floor((Date.now() - stageStartTime) / 1000);
-  const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
-  const s = String(elapsed % 60).padStart(2, '0');
-
   if (currentStage + 1 < STAGES.length) {
+    const elapsed = Math.floor((Date.now() - stageStartTime) / 1000);
+    const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+    const s = String(elapsed % 60).padStart(2, '0');
     title.textContent = `Stage ${currentStage + 1} Cleared!`;
     stats.innerHTML = `クリアタイム: ${m}:${s}<br>落下ミス: ${totalFalls}回`;
     nextBtn.textContent = "次のステージへ";
@@ -324,12 +316,17 @@ function showClearDialog() {
       loadStage(currentStage + 1);
     };
   } else {
+    // 全ステージクリア時は通算開始時刻 (gameStartTime) からの総合タイムを算出 (I-3)
+    const totalElapsed = Math.floor((Date.now() - gameStartTime) / 1000);
+    const m = String(Math.floor(totalElapsed / 60)).padStart(2, '0');
+    const s = String(totalElapsed % 60).padStart(2, '0');
     title.textContent = `All Stages Completed! 🎉`;
     stats.innerHTML = `全ラビリンス踏破！<br>トータルタイム: ${m}:${s}<br>総落下ミス: ${totalFalls}回`;
     nextBtn.textContent = "最初からリトライ";
     nextBtn.onclick = () => {
       overlay.style.display = 'none';
       totalFalls = 0;
+      gameStartTime = Date.now();
       stageStartTime = Date.now();
       loadStage(0);
     };
@@ -368,10 +365,8 @@ function updateTiltControls() {
   if (isDragging) {
     const delta = mousePos.subtract(dragStartPos);
     input = delta.clampLength(1.0);
-  }
-
-  // 3. スマホ傾きセンサー (rawTilt) の合成
-  if (rawTilt.length() > 0.05) {
+  } else if (rawTilt.length() > 0.05) {
+    // 3. スマホ傾きセンサー (rawTilt) の合成 (ドラッグ中以外に適用して競合を防止: I-4)
     input = rawTilt;
   }
 
@@ -462,7 +457,14 @@ function gameRenderPost() {
 // -----------------------------------------------------------------------------
 // ゲーム起動・iOS パーミッションハンドラ
 // -----------------------------------------------------------------------------
-document.getElementById('start-btn').addEventListener('click', async () => {
+let isStartingGame = false;
+document.getElementById('start-btn').addEventListener('click', async (e) => {
+  // 二重タップによる engineInit の重複起動防止 (I-2)
+  if (isStartingGame) return;
+  isStartingGame = true;
+  const startBtn = e.currentTarget;
+  if (startBtn) startBtn.disabled = true;
+
   // iOS 13+ の DeviceOrientation 許可要求
   if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
     try {
@@ -481,6 +483,7 @@ document.getElementById('start-btn').addEventListener('click', async () => {
   // スタートオーバーレイを閉じてゲーム開始
   document.getElementById('start-overlay').style.display = 'none';
   isPlaying = true;
+  gameStartTime = Date.now(); // 全ステージ通算タイマー開始 (I-3)
   stageStartTime = Date.now();
 
   // LittleJS エンジンの起動
