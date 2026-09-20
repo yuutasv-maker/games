@@ -4,7 +4,7 @@
 * **システム名:** Classic Tilt Maze（木製ボール転がし迷路）
 * **プラットフォーム:** Webブラウザ（iOS Safari / Android Chrome / PCデスクトップ）
 * **稼働URL:** `https://yuutasv-maker.github.io/games/games/tilt-maze/`
-* **基盤エンジン:** [LittleJS 2D Engine](file:///Users/yuuta/Antigravity/games/vendor/LittleJS-AI) (Canvas2D) + 自前物理衝突解決 + ZzFX（プロシージャル音源）
+* **基盤エンジン:** [LittleJS 2D Engine](https://github.com/KilledByAPixel/LittleJS) (Canvas2D) + 自前円-AABBクランプ物理衝突解決 + ZzFX（プロシージャル音源）
 
 ---
 
@@ -91,8 +91,13 @@ docs/games/tilt-maze/
    * BFS（幅優先探索）アルゴリズムにより、全ステージでスタートからゴールまで落とし穴を踏まない有効経路が存在することを保証。
    * 外周壁の閉塞性、S/Gの唯一性を検証。
 2. **物理衝突テスト ([tests/tilt-maze-physics.test.js](file:///Users/yuuta/Antigravity/games/tests/tilt-maze-physics.test.js)):**
-   * 壁抜け防止（AABBめり込み復元）
-   * 反発係数によるバウンド
-   * コーナー斜め突入時のブロック
+   * 壁抜け防止（外側接触の主処理パス AABB めり込み復元）
+   * 反発係数（`restitution = 0.35`）によるバウンド速度検証
+   * コーナー斜め突入時の角頂点クリアランス境界値検証
    * トンネリング限界速度時の貫通防止
-   * 落とし穴の引力・落下境界値判定
+   * 落とし穴の引力・落下境界値判定（`checkHolePull`）
+   * 転がり摩擦（`damping = 0.985`）による自然減速シミュレーション
+3. **ライフサイクル・ゲームロジックテスト ([tests/game-lifecycle.test.js](file:///Users/yuuta/Antigravity/games/tests/game-lifecycle.test.js)):**
+   * ステージクリア演出中のボール更新停止（穴落下暴走防止）
+   * 全ステージクリア時のトータルタイム全走破時間（`gameStartTime`）計算
+   * 開始ボタンの二重タップ防止ガード動作
