@@ -5,8 +5,14 @@
   "private": true,
   "scripts": {
     "test": "node --test tests/**/*.test.js",
+    "test:e2e": "NO_PROXY=127.0.0.1,localhost http_proxy= https_proxy= playwright test",
+    "test:e2e:ui": "NO_PROXY=127.0.0.1,localhost http_proxy= https_proxy= playwright test --ui",
+    "test:all": "npm test && npm run test:e2e",
     "deploy": "./scripts/deploy-pages.sh",
     "update:submodules": "./scripts/update-submodules.sh",
     "submodules:status": "git submodule status"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0"
   }
 }

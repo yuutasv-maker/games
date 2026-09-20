@@ -22,6 +22,23 @@ npm run deploy
 
 ---
 
+## テスト実行
+
+本ワークスペースはテスト駆動開発（TDD）および Playwright による E2E テスト環境を完備しています。
+
+```bash
+# 単体・物理・到達性テスト（Node.js 標準テストランナー、約120ms）
+npm test
+
+# E2E スモークテスト（Playwright: Desktop Chrome & Mobile Safari、ローカルサーバー自動起動）
+npm run test:e2e
+
+# 全テスト一括実行
+npm run test:all
+```
+
+---
+
 ## ディレクトリ構成
 
 ```text
