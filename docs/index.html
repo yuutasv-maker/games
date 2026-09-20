@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Games Portal - Antigravity Games</title>
+  <style>
+    :root {
+      --bg-color: #0d1117;
+      --card-bg: #161b22;
+      --card-border: #30363d;
+      --text-main: #f0f6fc;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --accent-glow: rgba(88, 166, 255, 0.2);
+      --neon-green: #3fb950;
+      --neon-purple: #bc8cff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 2.5rem 1.5rem 1.5rem;
+      text-align: center;
+      background: radial-gradient(circle at 50% 0%, #1f293d 0%, var(--bg-color) 70%);
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .badge-bar {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .badge.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-glow);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff 0%, var(--accent) 50%, var(--neon-purple) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    main {
+      flex: 1;
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-title::before {
+      content: "";
+      display: inline-block;
+      width: 4px;
+      height: 1.2rem;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .game-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+      box-shadow: 0 8px 24px var(--accent-glow);
+    }
+
+    .game-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .game-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .game-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      background: #238636;
+      color: #fff;
+    }
+
+    .game-desc {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-bottom: 1.25rem;
+      flex: 1;
+    }
+
+    .game-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #0d1117;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .game-action:hover {
+      opacity: 0.9;
+    }
+
+    /* Live Interactive Canvas Demo */
+    .demo-container {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    canvas {
+      width: 100%;
+      max-width: 600px;
+      height: 200px;
+      background: #090d13;
+      border-radius: 8px;
+      border: 1px solid #21262d;
+      margin: 1rem auto;
+      display: block;
+      cursor: crosshair;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      border-top: 1px solid var(--card-border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="badge-bar">
+      <span class="badge active">Antigravity AI</span>
+      <span class="badge">LittleJS</span>
+      <span class="badge">Phaser</span>
+      <span class="badge">ZzFXM</span>
+      <span class="badge">NippleJS</span>
+      <span class="badge">Playwright</span>
+    </div>
+    <h1>Games Workspace</h1>
+    <p class="subtitle">AIエージェントペアプログラミングによるWebゲーム開発・プロトタイピングハブ</p>
+  </header>
+
+  <main>
+    <div class="section-title">Projects & Games</div>
+    <div class="games-grid" id="games-list">
+      <!-- 雛形 / プロトタイプカード -->
+      <div class="game-card">
+        <div class="game-header">
+          <div class="game-title">Interactive Particle Canvas</div>
+          <span class="game-tag">Demo</span>
+        </div>
+        <p class="game-desc">軽量Canvas 2Dエンジンによるリアルタイムパーティクル＆バウンスシミュレーション。タップ/クリックで反発波を生成します。</p>
+        <a href="#interactive-demo" class="game-action">画面下でプレイ ↓</a>
+      </div>
+
+      <!-- 今後のゲーム追加スロット -->
+      <div class="game-card" style="border-style: dashed; background: rgba(22, 27, 34, 0.4);">
+        <div class="game-header">
+          <div class="game-title" style="color: var(--text-muted);">+ New Game Ready</div>
+          <span class="game-tag" style="background: #30363d;">Waiting</span>
+        </div>
+        <p class="game-desc">「アクションゲームを作って」「パズルを作って」と指示すると、LittleJSやPhaserを用いた新規ゲームがここに追加されます。</p>
+        <span style="color: var(--text-muted); font-size: 0.85rem; font-weight: 500;">Antigravity Pair Programming</span>
+      </div>
+    </div>
+
+    <div class="section-title" id="interactive-demo">Live Interactive Demo</div>
+    <div class="demo-container">
+      <p style="color: var(--text-muted); font-size: 0.9rem;">画面をクリック/タップしてパーティクルを爆発させてみてください</p>
+      <canvas id="demo-canvas" width="600" height="200"></canvas>
+      <p style="font-size: 0.8rem; color: var(--accent); font-family: monospace;" id="particle-count">Particles: 0</p>
+    </div>
+  </main>
+
+  <footer>
+    <p>Deployed with GitHub Pages &bull; Managed by <a href="https://github.com/yuutasv-maker/games" target="_blank">yuutasv-maker/games</a></p>
+  </footer>
+
+  <script>
+    // Canvas Interactive Particle System
+    const canvas = document.getElementById('demo-canvas');
+    const ctx = canvas.getContext('2d');
+    const countDisplay = document.getElementById('particle-count');
+
+    let particles = [];
+    const colors = ['#58a6ff', '#3fb950', '#bc8cff', '#f0883e', '#ff7b72'];
+
+    class Particle {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.vx = (Math.random() - 0.5) * 8;
+        this.vy = (Math.random() - 0.5) * 8;
+        this.radius = Math.random() * 3 + 2;
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+        this.life = 1.0;
+        this.decay = Math.random() * 0.02 + 0.01;
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += 0.15; // Gravity
+        this.life -= this.decay;
+      }
+      draw(ctx) {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, this.life);
+        ctx.fillStyle = this.color;
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function addExplosion(x, y, count = 25) {
+      for (let i = 0; i < count; i++) {
+        particles.push(new Particle(x, y));
+      }
+    }
+
+    // Auto spawn occasionally
+    let lastAuto = 0;
+    function loop(timestamp) {
+      ctx.fillStyle = 'rgba(9, 13, 19, 0.25)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      if (timestamp - lastAuto > 1200 && particles.length < 50) {
+        addExplosion(Math.random() * canvas.width, Math.random() * (canvas.height * 0.7), 15);
+        lastAuto = timestamp;
+      }
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.update();
+        if (p.life <= 0 || p.y > canvas.height) {
+          particles.splice(i, 1);
+        } else {
+          p.draw(ctx);
+        }
+      }
+
+      countDisplay.textContent = `Active Particles: ${particles.length}`;
+      requestAnimationFrame(loop);
+    }
+
+    function handleInteraction(e) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const x = (clientX - rect.left) * scaleX;
+      const y = (clientY - rect.top) * scaleY;
+      addExplosion(x, y, 35);
+    }
+
+    canvas.addEventListener('mousedown', handleInteraction);
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      handleInteraction(e);
+    }, { passive: false });
+
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
