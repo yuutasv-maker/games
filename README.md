@@ -40,7 +40,9 @@ npm run deploy
 │       └── pixelforge-mcp/             # PixelForge ドット絵アセット生成MCP
 ├── docs/                               # GitHub Pages 公開用ルートディレクトリ
 │   ├── index.html                      # ゲームポータル・ランチャー画面
-│   └── games/                          # 今後作成される各ゲーム（予定）
+│   └── games/                          # 公開ゲームディレクトリ
+│       └── tilt-maze/                  # Classic Tilt Maze ([仕様書](docs/games/tilt-maze/README.md))
+├── tests/                              # TDD 単体・物理・到達性テストスイート
 ├── vendor/                             # 上流追従用 Git サブモジュール群 (8リポジトリ)
 ├── scripts/
 │   ├── deploy-pages.sh                 # GitHub Pages へのデプロイスクリプト
