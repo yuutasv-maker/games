@@ -1,0 +1,32 @@
+[submodule "vendor/playwright-mcp"]
+	path = vendor/playwright-mcp
+	url = https://github.com/microsoft/playwright-mcp.git
+	branch = main
+[submodule "vendor/chrome-devtools-mcp"]
+	path = vendor/chrome-devtools-mcp
+	url = https://github.com/ChromeDevTools/chrome-devtools-mcp.git
+	branch = main
+[submodule "vendor/LittleJS-AI"]
+	path = vendor/LittleJS-AI
+	url = https://github.com/KilledByAPixel/LittleJS-AI.git
+	branch = main
+[submodule "vendor/workflow-template"]
+	path = vendor/workflow-template
+	url = https://github.com/ramunasnognys/workflow-template.git
+	branch = matt/improve-ui
+[submodule "vendor/phaser-game-agent"]
+	path = vendor/phaser-game-agent
+	url = https://github.com/phaserjs/phaser-game-agent.git
+	branch = main
+[submodule "vendor/ZzFXM"]
+	path = vendor/ZzFXM
+	url = https://github.com/keithclark/ZzFXM.git
+	branch = master
+[submodule "vendor/nipplejs"]
+	path = vendor/nipplejs
+	url = https://github.com/yoannmoinet/nipplejs.git
+	branch = master
+[submodule "vendor/pixelforge-mcp"]
+	path = vendor/pixelforge-mcp
+	url = https://github.com/freema/pixelforge-mcp.git
+	branch = main
