@@ -32,6 +32,7 @@ let activeBall = null;
 let activeHoles = [];
 let activeWalls = [];
 let activeGoal = null;
+let currentStageGrid = null;
 
 // -----------------------------------------------------------------------------
 // ZzFX プロシージャル効果音
@@ -138,6 +139,7 @@ class Wall extends EngineObject {
     super(pos, size);
     this.isSolid = true;
     this.mass = 0; // 静的剛体
+    this.setCollision(true, true); // LittleJS の剛体衝突リストに明示的に登録
     this.color = new Color(0.42, 0.26, 0.14); // オーク・ウォールナット調
   }
 
@@ -213,6 +215,7 @@ class Ball extends EngineObject {
   constructor(pos) {
     // 直径 0.7 ユニットの球体
     super(pos, vec2(0.7, 0.7));
+    this.radius = 0.35; // 半径 (物理衝突解決用)
     this.setCollision(true, true);
     this.restitution = 0.35; // 適度な木製反発
     this.damping = 0.985;    // 転がり摩擦
@@ -322,6 +325,7 @@ function loadStage(stageIndex) {
 
   const stageData = STAGES[stageIndex];
   const grid = stageData.grid;
+  currentStageGrid = grid;
   const half = MAZE_GRID_SIZE / 2;
 
   for (let r = 0; r < MAZE_GRID_SIZE; r++) {
@@ -499,6 +503,14 @@ function gameUpdate() {
 }
 
 function gameUpdatePost() {
+  // ボールの壁抜け防止 (物理更新直後の円-AABB衝突解決・めり込み即時復元)
+  if (activeBall && !activeBall.falling && currentStageGrid) {
+    const collided = resolveWallCollisions(activeBall, currentStageGrid, MAZE_GRID_SIZE, CELL_SIZE);
+    if (collided && activeBall.velocity.length() > 0.04) {
+      playSoundWoodHit(activeBall.velocity.length() * 3);
+    }
+  }
+
   // 画面サイズに応じて盤面全体が収まるようカメラスケールを自動調整
   const targetViewSize = BOARD_SIZE + 2.0; // 余白マージン
   const scale = Math.min(mainCanvasSize.x / targetViewSize, mainCanvasSize.y / targetViewSize);
