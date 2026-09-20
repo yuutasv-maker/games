@@ -4,6 +4,7 @@
   "description": "Multi-game prototyping and development workspace with Antigravity AI skills and toolchain",
   "private": true,
   "scripts": {
+    "deploy": "./scripts/deploy-pages.sh",
     "update:submodules": "./scripts/update-submodules.sh",
     "submodules:status": "git submodule status"
   }
